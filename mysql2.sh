@@ -36,5 +36,15 @@ VALIDATE $? "Enabling Mysql server"
 dnf start mysqld &>>$LOGFILE
 VALIDATE $? "Starting Mysql server"
 
-mysql_secure_installation --set-root-pass ExpenseApp@1 &>>$LOGFILE
-VALIDATE $? "Setting Mysql root password"
+# mysql_secure_installation --set-root-pass ExpenseApp@1 &>>$LOGFILE
+# VALIDATE $? "Setting Mysql root password"
+
+#Below code will be useful for idempotency nature
+mysql -h db.daws76s.online -uroot -pExpenseApp@1 -e 'show databases;' &>>$LOGFILE
+if [ $? -ne 0 ]
+then
+    mysql_secure_installation --set-root-pass ExpenseApp@1 &>>$LOGFILE
+    VALIDATE $? "Mysql Root password setup"
+else
+    echo -e "Mysql Root password is already setup...$Y skipping $N"
+fi
